@@ -1,22 +1,54 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import MainScreen from '../../components/MainScreen'
 import Loading from '../../components/Loading'
 import ErrorMessage from '../../components/ErrorMessage';
 import { Card } from 'react-bootstrap';
 import ReactMarkdown from "react-markdown";
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import apiBaseUrl from '../../config/api';
 
 
-const CreateNote = () => {
+
+const EditNote = () => {
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [category, setCategory] = useState('');
+    const [id, setId] = useState('');
     const navigate = useNavigate();
+
+    const params = useParams();
+
+    const config = {
+        headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${Cookies.get('auth')}`
+        },
+        withCredentials: true
+    }
+
+
+    useEffect(() => {
+
+        const fetching = async () => {
+            const { data } = await axios.get(`${apiBaseUrl}/api/notes/${params.id}`, config);
+            if(!data.length)
+            {
+                setError("This Note doesnot exist.");
+                return;
+            }
+            setTitle(data[0].title);
+            setContent(data[0].content);
+            setCategory(data[0].category);
+            setId(data[0]._id);
+        };
+
+        fetching();
+    }, [params.id])
+
 
 
     const handleTitleChange = (e) => {
@@ -31,22 +63,14 @@ const CreateNote = () => {
         setCategory(e.target.value);
     };
 
-    const handleCreate = async (e) => {
+    const handleUpdate = async (e) => {
         // Handle the logic for creating the post, e.g., sending data to a server
         e.preventDefault();
-        try {
-            const config = {
-                headers: {
-                    "Content-type": "application/json",
-                    Authorization: `Bearer ${Cookies.get('auth')}`
-                },
-                withCredentials: true
-            }
+        try {   
             setError(false);
-
             setLoading(true);
-            const { data } = await axios.post(
-                `${apiBaseUrl}/api/notes/create`,
+            const { data } = await axios.put(
+                `${apiBaseUrl}/api/notes/${params.id}`,
                 {
                     title,
                     category,
@@ -65,16 +89,19 @@ const CreateNote = () => {
         }
     };
 
-    const handleReset = () => {
-        setTitle('');
-        setContent('');
-        setCategory('');
+    const handleDelete = async() => {
+        if (window.confirm("Are you sure to remove?")) {
+            await axios.delete(`/api/notes/${id}`, config)
+            navigate("/mynotes");
+        }
     };
 
-    
+
+
+
 
     return (
-        <MainScreen title="Create Note">
+        <MainScreen title="Edit Note">
             <div className="container">
                 {error && <ErrorMessage variant="danger">{error}</ErrorMessage>}
                 {loading && <Loading />}
@@ -125,17 +152,17 @@ const CreateNote = () => {
                     />
                 </div>
                 <div className="mb-3">
-                    <button className="btn btn-primary me-2" onClick={handleCreate}>
-                        Create
+                    <button className="btn btn-primary me-2" onClick={handleUpdate}>
+                        Update
                     </button>
-                    <button className="btn btn-danger" onClick={handleReset}>
-                        Reset
+                    <button className="btn btn-danger" onClick={()=>handleDelete(id)}>
+                        Delete
                     </button>
                 </div>
             </div>
-           
+
         </MainScreen>
     )
 }
 
-export default CreateNote
+export default EditNote

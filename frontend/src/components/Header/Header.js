@@ -34,11 +34,11 @@ function Header() {
               <Link to="/mynotes">My Notes</Link>
             </Navbar.Brand>
                 <NavDropdown title="Settings" id="navbarScrollingDropdown">
-                  <NavDropdown.Item href="#action3">My Profile</NavDropdown.Item>
+                  <NavDropdown.Item href="/profile">My Profile</NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={() => {
-                    Cookies.remove("user");
-                    Cookies.remove("auth");
+                Cookies.remove("user", { path: "/" });
+                Cookies.remove("auth", { path: "/" });
                     navigate("/")
                   }}>Logout </NavDropdown.Item>
                 </NavDropdown>       

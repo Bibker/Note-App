@@ -1,4 +1,5 @@
 const express= require("express");
+const cors = require('cors');
 const notes= require('./data/notes')
 const dotenv= require("dotenv");
 const connectDB = require("./config/db");
@@ -12,6 +13,7 @@ dotenv.config();
 connectDB();
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 
 
 app.get("/", (req,res)=>{
@@ -36,4 +38,4 @@ app.use(errorHandler)
 
 const PORT=process.env.PORT || 5000;
 
-app.listen(PORT,console.log("App Started at Port 5000"));
+app.listen(PORT,console.log(`App Started at Port ${PORT}`));

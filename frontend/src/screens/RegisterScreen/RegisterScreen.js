@@ -5,6 +5,7 @@ import { Button, Form } from 'react-bootstrap'
 import axios from 'axios';
 import Loading from '../../components/Loading';
 import { useNavigate } from 'react-router-dom';
+import apiBaseUrl from '../../config/api';
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState("");
@@ -37,10 +38,11 @@ const RegisterScreen = () => {
           headers: {
             "Content-type":"application/json",
           },
+          withCredentials: true
         };
         setLoading(true);
         const { data }= await axios.post(
-        "/api/users",
+        `${apiBaseUrl}/api/users`,
         {
           name,
           pic,
@@ -48,9 +50,12 @@ const RegisterScreen = () => {
           password
         },
         config
-        );
-        setLoading(false);
-        localStorage.setItem("userInfo",JSON.stringify(data));
+        ).then((data)=>{
+          setLoading(false);
+          localStorage.setItem("user", JSON.stringify(data));
+
+        })
+     
         navigate("/mynotes")
 
         
@@ -100,10 +105,10 @@ const RegisterScreen = () => {
             onChange={(e)=>setConfirmPassword(e.target.value)}
             />
           </Form.Group>
-          <Form.Group className="mb-3" >
+          {/* <Form.Group className="mb-3" >
             <Form.Label>Profile Picture</Form.Label>
             <Form.Control id="custom-file" type="file"  label="Select Profile Picture"  />
-          </Form.Group>
+          </Form.Group> */}
           <Button variant="primary" type="submit">
             Register
           </Button>

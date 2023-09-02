@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Loading from '../../components/Loading'
 import ErrorMessage from '../../components/ErrorMessage';
+import apiBaseUrl from '../../config/api';
 
 
 const LoginScreen = () => {
@@ -28,13 +29,14 @@ const LoginScreen = () => {
             const config={
                 headers: {
                     "Content-type":"application/json"
-                }
+                },
+                withCredentials: true
             }
             setError(false);
 
             setLoading(true);
             const {data}= await axios.post(
-                "/api/users/login",
+                `${apiBaseUrl}/api/users/login`,
                 {
                     email,
                     password,

@@ -7,58 +7,78 @@ import axios from "axios";
 import Cookies from 'js-cookie';
 import Loading from "../../components/Loading"
 import ErrorMessage from "../../components/ErrorMessage"
+import apiBaseUrl from "../../config/api"
 
-const MyNotes = () => {
+const MyNotes = ({search}) => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [notes, setNotes] = useState([]);
   const [user, setUser] = useState(null);
+  const [remove, setRemove] = useState(false);
+  const config = {
+    headers: {
+      Authorization: `Bearer ${Cookies.get('auth')}`
+    },
+    withCredentials: true
+  }
 
   const fetchNotes = async () => {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${Cookies.get('auth')}`
-      }
-    }
-
-    const { data } = await axios.get("/api/notes", config)
+    const { data } = await axios.get(`${apiBaseUrl}/api/notes`, config)
     console.log(data);
-    setLoading(false);
     if(data.length> 0)
       setNotes(data)
     else
-      setError("No Notes Found.")
+      setError("No Notes Found.");
+    setLoading(false);
+    
+      
   }
 
   const getUser = () => {
-    setLoading(false);
+    // setLoading(false);
     if (Cookies.get('user')) {
       const userFromCookie = JSON.parse(Cookies.get('user'));
       setUser(userFromCookie);
     } else {
-      setUser(null);
+      setLoading(true);
+      setError("Please, Login to view notes!")
     }
 
+  }
+
+  const handleDelete= async(id)=> {
+    setRemove(false);
+    setLoading(true);
+    if(window.confirm("Are you sure to remove?"))
+    {
+      await axios.delete(`${apiBaseUrl}/api/notes/${id}`, config)
+      setRemove(true);
+    }
+    else
+      setLoading(false);
+    
   }
 
   useEffect(() => {
     fetchNotes();
     getUser();
 
-  }, [])
+  }, [remove])
 
   return (
-    <MainScreen title={loading ? 'Loading...':`Welcome Back ${user.name}  !`}>
+    <MainScreen title={loading ? '':`Welcome Back ${user.name}  !`}>
 
-      <Link to="/createnote">
+      <Link to={loading ? "/login" :"/createnote"}>
         <Button style={{ marginLeft: 10, marginBottom: 6 }} size="lg">
-          Create New Note
+          {loading ? 'Go Back to Login' : "Create New Note"}
         </Button>
       </Link>
       {loading && <Loading />}
       {error && <ErrorMessage variant="danger">{error}</ErrorMessage>}
-      {notes.map((note) => (
+      {notes.reverse().filter(filteredNote=>(
+        filteredNote.title.toLowerCase().includes(search.toLowerCase())
+      )).map((note) => (
         <Accordion key={note._id}>
           <AccordionItem eventKey="0">
             <Card style={{ margin: 10 }}>
@@ -82,7 +102,7 @@ const MyNotes = () => {
                   <Button
                     variant="danger"
                     className="mx-2"
-                    onClick={() => alert(note._id)}
+                    onClick={()=>handleDelete(note._id)}
                   >
                     Delete
                   </Button>
