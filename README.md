@@ -1,3 +1,4 @@
+[![wakatime](https://wakatime.com/badge/github/Bibker/Note-App.svg)](https://wakatime.com/badge/github/Bibker/Note-App)
 # Note Zipper App 📝
 
 # ⚠️ **Warning: Experimental Use** ⚠️
